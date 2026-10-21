@@ -1,11 +1,15 @@
 import { StyleSheet, Text, View } from 'react-native';
 import { colors, fontSize, spacing } from '../styles/theme';
 
-export default function Index() {
+type Props = {
+  title: string;
+};
+
+export function ScreenPlaceholder({ title }: Props) {
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Mentor</Text>
-      <Text style={styles.subtitle}>Gestão de estudos</Text>
+      <Text style={styles.title}>{title}</Text>
+      <Text style={styles.text}>Em construção</Text>
     </View>
   );
 }
@@ -19,11 +23,11 @@ const styles = StyleSheet.create({
     padding: spacing.lg,
   },
   title: {
-    fontSize: fontSize.title,
+    fontSize: fontSize.xl,
     fontWeight: '700',
     color: colors.primary,
   },
-  subtitle: {
+  text: {
     marginTop: spacing.xs,
     fontSize: fontSize.md,
     color: colors.textMuted,
