@@ -1,5 +1,5 @@
-import { ScreenPlaceholder } from '../../components/ScreenPlaceholder';
+import { AtividadesScreen } from '../../screens/AtividadesScreen';
 
 export default function AtividadesRoute() {
-  return <ScreenPlaceholder title="Atividades" />;
+  return <AtividadesScreen />;
 }
