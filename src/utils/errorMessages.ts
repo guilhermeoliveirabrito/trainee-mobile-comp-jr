@@ -21,6 +21,10 @@ export function getErrorMessage(error: unknown): string {
     return 'O servidor está indisponível no momento. Tente novamente em instantes.';
   }
 
+  if (e.code === 'resposta_invalida') {
+    return 'Recebemos uma resposta inesperada do servidor. Tente novamente.';
+  }
+
   if (e.code === 'invalid_credentials' || message.includes('invalid login credentials')) {
     return 'E-mail ou senha incorretos.';
   }
@@ -43,6 +47,14 @@ export function getErrorMessage(error: unknown): string {
 
   if (e.code === 'PGRST116') {
     return 'Não encontramos este registro. Ele pode ter sido excluído.';
+  }
+
+  if (e.status === 401 || e.code === 'PGRST301' || message.includes('jwt expired')) {
+    return 'Sua sessão expirou. Saia e entre novamente.';
+  }
+
+  if (e.status === 403 || e.code === '42501') {
+    return 'Você não tem permissão para realizar esta ação.';
   }
 
   return 'Algo deu errado. Tente novamente.';
