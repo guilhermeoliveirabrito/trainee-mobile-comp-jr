@@ -34,6 +34,10 @@ function RootNavigator() {
           name="atividade/nova"
           options={{ ...cabecalho, title: 'Nova atividade' }}
         />
+        <Stack.Screen
+          name="atividade/[id]"
+          options={{ ...cabecalho, title: 'Editar atividade' }}
+        />
       </Stack.Protected>
 
       <Stack.Protected guard={!session}>
