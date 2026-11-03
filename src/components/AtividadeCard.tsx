@@ -7,9 +7,10 @@ import { formatarData, hojeIso } from '../utils/datas';
 type Props = {
   atividade: Atividade;
   onPress?: () => void;
+  onToggle?: () => void;
 };
 
-export function AtividadeCard({ atividade, onPress }: Props) {
+export function AtividadeCard({ atividade, onPress, onToggle }: Props) {
   const concluida = atividade.status === 'concluida';
   const atrasada =
     !concluida && !!atividade.data_entrega && atividade.data_entrega < hojeIso();
@@ -44,6 +45,18 @@ export function AtividadeCard({ atividade, onPress }: Props) {
           {atrasada ? 'Atrasada • ' : 'Entrega: '}
           {formatarData(atividade.data_entrega)}
         </Text>
+      )}
+
+      {!!onToggle && (
+        <Pressable
+          onPress={onToggle}
+          hitSlop={6}
+          style={({ pressed }) => [styles.acao, pressed && styles.pressionado]}
+        >
+          <Text style={styles.acaoTexto}>
+            {concluida ? 'Reabrir' : 'Marcar como concluída'}
+          </Text>
+        </Pressable>
       )}
     </Pressable>
   );
@@ -108,5 +121,19 @@ const styles = StyleSheet.create({
   },
   atrasada: {
     color: colors.danger,
+  },
+  acao: {
+    alignSelf: 'flex-start',
+    marginTop: spacing.md,
+    paddingHorizontal: spacing.md,
+    paddingVertical: 8,
+    borderWidth: 1,
+    borderColor: colors.primary,
+    borderRadius: radius.lg,
+  },
+  acaoTexto: {
+    fontSize: fontSize.sm,
+    fontWeight: '600',
+    color: colors.primary,
   },
 });
