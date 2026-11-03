@@ -1,5 +1,6 @@
-import { Stack } from 'expo-router';
+import { type ErrorBoundaryProps, Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
+import { ErroFallback } from '../components/ErroFallback';
 import { LoadingState } from '../components/LoadingState';
 import { AuthProvider, useAuth } from '../contexts/AuthContext';
 import { colors } from '../styles/theme';
@@ -10,6 +11,10 @@ const cabecalho = {
   headerStyle: { backgroundColor: colors.primary },
   headerTintColor: colors.surface,
 };
+
+export function ErrorBoundary({ error, retry }: ErrorBoundaryProps) {
+  return <ErroFallback error={error} onRetry={retry} />;
+}
 
 function RootNavigator() {
   const { session, loading } = useAuth();
