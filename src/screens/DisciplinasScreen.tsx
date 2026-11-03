@@ -33,7 +33,14 @@ export function DisciplinasScreen() {
       <FlatList
         data={disciplinas}
         keyExtractor={(item) => item.id}
-        renderItem={({ item }) => <DisciplinaCard disciplina={item} />}
+                renderItem={({ item }) => (
+          <DisciplinaCard
+            disciplina={item}
+            onPress={() =>
+              router.push({ pathname: '/disciplina/[id]', params: { id: item.id } })
+            }
+          />
+        )}
         contentContainerStyle={[
           styles.lista,
           disciplinas.length === 0 && styles.listaVazia,
