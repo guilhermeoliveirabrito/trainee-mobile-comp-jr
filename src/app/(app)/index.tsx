@@ -1,5 +1,5 @@
-import { ScreenPlaceholder } from '../../components/ScreenPlaceholder';
+import { InicioScreen } from '../../screens/InicioScreen';
 
-export default function HomeRoute() {
-  return <ScreenPlaceholder title="Início" />;
+export default function InicioRoute() {
+  return <InicioScreen />;
 }
