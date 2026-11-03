@@ -1,5 +1,12 @@
 import { Session } from '@supabase/supabase-js';
-import { createContext, ReactNode, useContext, useEffect, useState } from 'react';
+import {
+  createContext,
+  ReactNode,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
 import { supabase } from '../services/supabase';
 import { getErrorMessage } from '../utils/errorMessages';
 
@@ -10,6 +17,7 @@ type AuthResult = {
 type AuthContextData = {
   session: Session | null;
   loading: boolean;
+  sessaoExpirada: boolean;
   signIn: (email: string, password: string) => Promise<AuthResult>;
   signUp: (nome: string, email: string, password: string) => Promise<AuthResult>;
   signOut: () => Promise<void>;
@@ -20,6 +28,8 @@ const AuthContext = createContext<AuthContextData | undefined>(undefined);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
+  const [sessaoExpirada, setSessaoExpirada] = useState(false);
+  const saidaManual = useRef(false);
 
   useEffect(() => {
     supabase.auth
@@ -28,8 +38,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       .catch(() => setSession(null))
       .finally(() => setLoading(false));
 
-    const { data } = supabase.auth.onAuthStateChange((_evento, novaSessao) => {
+    const { data } = supabase.auth.onAuthStateChange((evento, novaSessao) => {
       setSession(novaSessao);
+
+      if (evento === 'SIGNED_OUT') {
+        setSessaoExpirada(!saidaManual.current);
+      }
+
+      if (evento === 'SIGNED_IN') {
+        setSessaoExpirada(false);
+      }
     });
 
     return () => data.subscription.unsubscribe();
@@ -58,11 +76,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   async function signOut() {
-    await supabase.auth.signOut();
+    saidaManual.current = true;
+    try {
+      await supabase.auth.signOut();
+    } finally {
+      saidaManual.current = false;
+    }
   }
 
   return (
-    <AuthContext.Provider value={{ session, loading, signIn, signUp, signOut }}>
+    <AuthContext.Provider
+      value={{ session, loading, sessaoExpirada, signIn, signUp, signOut }}
+    >
       {children}
     </AuthContext.Provider>
   );

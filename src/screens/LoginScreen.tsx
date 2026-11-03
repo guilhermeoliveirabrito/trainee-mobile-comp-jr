@@ -16,7 +16,7 @@ type Erros = {
 };
 
 export function LoginScreen() {
-  const { signIn } = useAuth();
+  const { signIn, sessaoExpirada } = useAuth();
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
   const [erros, setErros] = useState<Erros>({});
@@ -45,6 +45,9 @@ export function LoginScreen() {
 
   return (
     <AuthLayout title="Bem-vindo ao Mentor!" subtitle="Faça seu login">
+      {sessaoExpirada && (
+        <FeedbackMessage type="error" text="Sua sessão expirou. Entre novamente." />
+      )}
       {!!erroGeral && <FeedbackMessage type="error" text={erroGeral} />}
 
       <Input
