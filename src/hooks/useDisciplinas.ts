@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useFocusEffect } from 'expo-router';
+import { useCallback, useState } from 'react';
 import { listarDisciplinas } from '../services/disciplinas';
 import { Disciplina } from '../types/disciplina';
 import { getErrorMessage } from '../utils/errorMessages';
@@ -18,9 +19,11 @@ export function useDisciplinas() {
     }
   }, []);
 
-  useEffect(() => {
-    carregar().finally(() => setLoading(false));
-  }, [carregar]);
+  useFocusEffect(
+    useCallback(() => {
+      carregar().finally(() => setLoading(false));
+    }, [carregar])
+  );
 
   const recarregar = useCallback(async () => {
     setRefreshing(true);
