@@ -41,5 +41,9 @@ export function getErrorMessage(error: unknown): string {
     return 'Muitas tentativas seguidas. Aguarde um pouco e tente de novo.';
   }
 
+  if (e.code === 'PGRST116') {
+    return 'Não encontramos este registro. Ele pode ter sido excluído.';
+  }
+
   return 'Algo deu errado. Tente novamente.';
 }
