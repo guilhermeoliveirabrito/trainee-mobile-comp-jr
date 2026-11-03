@@ -1,5 +1,5 @@
-import { ScreenPlaceholder } from '../../components/ScreenPlaceholder';
+import { DisciplinasScreen } from '../../screens/DisciplinasScreen';
 
 export default function DisciplinasRoute() {
-  return <ScreenPlaceholder title="Disciplinas" />;
+  return <DisciplinasScreen />;
 }
