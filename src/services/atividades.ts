@@ -1,21 +1,14 @@
 import { Atividade, DadosAtividade, StatusAtividade } from '../types/atividade';
+import {
+    garantirLista,
+    garantirObjeto,
+    garantirRegistro,
+    lancarErro,
+} from './erros';
 import { supabase } from './supabase';
 
 const COLUNAS =
   'id, disciplina_id, titulo, descricao, tipo, prioridade, status, data_entrega, criado_em, disciplinas(nome, cor)';
-
-function lancarErro(error: { message: string; code?: string }, status: number): never {
-  throw Object.assign(new Error(error.message), { code: error.code, status });
-}
-
-function garantirRegistro(data: unknown[] | null) {
-  if (!data || data.length === 0) {
-    throw Object.assign(new Error('Registro não encontrado'), {
-      code: 'PGRST116',
-      status: 404,
-    });
-  }
-}
 
 export async function listarAtividades(): Promise<Atividade[]> {
   const { data, error, status } = await supabase
@@ -26,7 +19,7 @@ export async function listarAtividades(): Promise<Atividade[]> {
 
   if (error) lancarErro(error, status);
 
-  return (data ?? []) as unknown as Atividade[];
+  return garantirLista<Atividade>(data);
 }
 
 export async function buscarAtividade(id: string): Promise<Atividade> {
@@ -38,7 +31,7 @@ export async function buscarAtividade(id: string): Promise<Atividade> {
 
   if (error) lancarErro(error, status);
 
-  return data as unknown as Atividade;
+  return garantirObjeto<Atividade>(data);
 }
 
 export async function criarAtividade(dados: DadosAtividade): Promise<void> {
