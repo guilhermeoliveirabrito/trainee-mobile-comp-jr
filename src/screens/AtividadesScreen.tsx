@@ -1,17 +1,19 @@
 import { router } from 'expo-router';
 import { useState } from 'react';
-import { FlatList, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Alert, FlatList, StyleSheet, TextInput, View } from 'react-native';
 import { AtividadeCard } from '../components/AtividadeCard';
 import { Button } from '../components/Button';
 import { EmptyState } from '../components/EmptyState';
 import { FeedbackMessage } from '../components/FeedbackMessage';
+import { FloatingButton } from '../components/FloatingButton';
 import { LoadingState } from '../components/LoadingState';
 import { OptionSelector } from '../components/OptionSelector';
 import { STATUS } from '../constants/atividade';
 import { useAtividades } from '../hooks/useAtividades';
+import { atualizarStatusAtividade } from '../services/atividades';
 import { colors, fontSize, radius, spacing } from '../styles/theme';
-import { StatusAtividade } from '../types/atividade';
+import { Atividade, StatusAtividade } from '../types/atividade';
+import { getErrorMessage } from '../utils/errorMessages';
 
 type Filtro = 'todas' | StatusAtividade;
 
@@ -22,12 +24,25 @@ const FILTROS: { value: Filtro; label: string }[] = [
 
 export function AtividadesScreen() {
   const { atividades, loading, refreshing, erro, recarregar } = useAtividades();
-  const insets = useSafeAreaInsets();
   const [busca, setBusca] = useState('');
   const [filtro, setFiltro] = useState<Filtro>('todas');
 
   function abrirCadastro() {
     router.push('/atividade/nova');
+  }
+
+  async function alternarConclusao(atividade: Atividade) {
+    const novoStatus: StatusAtividade =
+      atividade.status === 'concluida' ? 'pendente' : 'concluida';
+
+    try {
+      await atualizarStatusAtividade(atividade.id, novoStatus);
+    } catch (e) {
+      Alert.alert('Não foi possível atualizar', getErrorMessage(e));
+      return;
+    }
+
+    await recarregar();
   }
 
   if (loading) {
@@ -64,7 +79,15 @@ export function AtividadesScreen() {
       <FlatList
         data={filtradas}
         keyExtractor={(item) => item.id}
-        renderItem={({ item }) => <AtividadeCard atividade={item} />}
+        renderItem={({ item }) => (
+          <AtividadeCard
+            atividade={item}
+            onPress={() =>
+              router.push({ pathname: '/atividade/[id]', params: { id: item.id } })
+            }
+            onToggle={() => alternarConclusao(item)}
+          />
+        )}
         keyboardShouldPersistTaps="handled"
         contentContainerStyle={[styles.lista, filtradas.length === 0 && styles.listaVazia]}
         refreshing={refreshing}
@@ -86,13 +109,7 @@ export function AtividadesScreen() {
         }
       />
 
-      <Pressable
-        onPress={abrirCadastro}
-        accessibilityLabel="Adicionar atividade"
-        style={[styles.botao, { bottom: spacing.lg + insets.bottom }]}
-      >
-        <Text style={styles.botaoTexto}>+</Text>
-      </Pressable>
+      <FloatingButton onPress={abrirCadastro} accessibilityLabel="Adicionar atividade" />
     </View>
   );
 }
@@ -127,25 +144,5 @@ const styles = StyleSheet.create({
   },
   listaVazia: {
     flexGrow: 1,
-  },
-  botao: {
-    position: 'absolute',
-    right: spacing.lg,
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: colors.primary,
-    elevation: 4,
-    shadowColor: '#000',
-    shadowOpacity: 0.2,
-    shadowRadius: 6,
-    shadowOffset: { width: 0, height: 3 },
-  },
-  botaoTexto: {
-    fontSize: 30,
-    lineHeight: 34,
-    color: colors.surface,
   },
 });
