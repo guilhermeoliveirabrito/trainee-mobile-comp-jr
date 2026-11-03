@@ -6,6 +6,7 @@ import { colors } from '../styles/theme';
 
 const cabecalho = {
   headerShown: true,
+  headerBackTitle: 'Voltar',
   headerStyle: { backgroundColor: colors.primary },
   headerTintColor: colors.surface,
 };
@@ -28,6 +29,10 @@ function RootNavigator() {
         <Stack.Screen
           name="disciplina/[id]"
           options={{ ...cabecalho, title: 'Editar disciplina' }}
+        />
+        <Stack.Screen
+          name="atividade/nova"
+          options={{ ...cabecalho, title: 'Nova atividade' }}
         />
       </Stack.Protected>
 
