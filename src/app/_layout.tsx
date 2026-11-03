@@ -4,6 +4,12 @@ import { LoadingState } from '../components/LoadingState';
 import { AuthProvider, useAuth } from '../contexts/AuthContext';
 import { colors } from '../styles/theme';
 
+const cabecalho = {
+  headerShown: true,
+  headerStyle: { backgroundColor: colors.primary },
+  headerTintColor: colors.surface,
+};
+
 function RootNavigator() {
   const { session, loading } = useAuth();
 
@@ -17,12 +23,11 @@ function RootNavigator() {
         <Stack.Screen name="(app)" />
         <Stack.Screen
           name="disciplina/nova"
-          options={{
-            headerShown: true,
-            title: 'Nova disciplina',
-            headerStyle: { backgroundColor: colors.primary },
-            headerTintColor: colors.surface,
-          }}
+          options={{ ...cabecalho, title: 'Nova disciplina' }}
+        />
+        <Stack.Screen
+          name="disciplina/[id]"
+          options={{ ...cabecalho, title: 'Editar disciplina' }}
         />
       </Stack.Protected>
 
