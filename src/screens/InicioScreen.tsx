@@ -1,24 +1,24 @@
 import { router } from 'expo-router';
-import { RefreshControl, ScrollView, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
+import { RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { AtividadeCard } from '../components/AtividadeCard';
 import { Button } from '../components/Button';
 import { EmptyState } from '../components/EmptyState';
 import { FeedbackMessage } from '../components/FeedbackMessage';
+import { GridItem } from '../components/GridItem';
 import { LoadingState } from '../components/LoadingState';
 import { StatCard } from '../components/StatCard';
 import { useAuth } from '../contexts/AuthContext';
 import { useAtividades } from '../hooks/useAtividades';
+import { useLayoutResponsivo } from '../hooks/useLayoutResponsivo';
 import { colors, fontSize, spacing } from '../styles/theme';
 import { hojeIso } from '../utils/datas';
-
-const LARGURA_TABLET = 768;
 
 export function InicioScreen() {
   const { session } = useAuth();
   const { atividades, loading, refreshing, erro, recarregar } = useAtividades();
-  const { width } = useWindowDimensions();
+  const { isTablet, colunas } = useLayoutResponsivo();
 
-  const larguraCard = width >= LARGURA_TABLET ? '23.5%' : '48%';
+  const larguraCard = isTablet ? '23.5%' : '48%';
   const nomeCompleto = session?.user.user_metadata?.nome as string | undefined;
   const primeiroNome = nomeCompleto?.trim().split(' ')[0];
 
@@ -83,15 +83,21 @@ export function InicioScreen() {
         </View>
 
         {proximas.length > 0 ? (
-          proximas.map((atividade) => (
-            <AtividadeCard
-              key={atividade.id}
-              atividade={atividade}
-              onPress={() =>
-                router.push({ pathname: '/atividade/[id]', params: { id: atividade.id } })
-              }
-            />
-          ))
+          <View style={colunas > 1 && styles.grade}>
+            {proximas.map((atividade) => (
+              <GridItem key={atividade.id} colunas={colunas}>
+                <AtividadeCard
+                  atividade={atividade}
+                  onPress={() =>
+                    router.push({
+                      pathname: '/atividade/[id]',
+                      params: { id: atividade.id },
+                    })
+                  }
+                />
+              </GridItem>
+            ))}
+          </View>
         ) : (
           <View style={styles.vazio}>
             <EmptyState
@@ -167,6 +173,11 @@ const styles = StyleSheet.create({
     fontSize: fontSize.sm,
     fontWeight: '600',
     color: colors.accent,
+  },
+  grade: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    marginHorizontal: -spacing.sm,
   },
   vazio: {
     minHeight: 220,
