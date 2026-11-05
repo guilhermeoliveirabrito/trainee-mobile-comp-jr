@@ -6,10 +6,12 @@ import { Button } from '../components/Button';
 import { EmptyState } from '../components/EmptyState';
 import { FeedbackMessage } from '../components/FeedbackMessage';
 import { FloatingButton } from '../components/FloatingButton';
+import { GridItem } from '../components/GridItem';
 import { LoadingState } from '../components/LoadingState';
 import { OptionSelector } from '../components/OptionSelector';
 import { STATUS } from '../constants/atividade';
 import { useAtividades } from '../hooks/useAtividades';
+import { useLayoutResponsivo } from '../hooks/useLayoutResponsivo';
 import { atualizarStatusAtividade } from '../services/atividades';
 import { colors, fontSize, radius, spacing } from '../styles/theme';
 import { Atividade, StatusAtividade } from '../types/atividade';
@@ -24,6 +26,7 @@ const FILTROS: { value: Filtro; label: string }[] = [
 
 export function AtividadesScreen() {
   const { atividades, loading, refreshing, erro, recarregar } = useAtividades();
+  const { colunas } = useLayoutResponsivo();
   const [busca, setBusca] = useState('');
   const [filtro, setFiltro] = useState<Filtro>('todas');
 
@@ -77,19 +80,27 @@ export function AtividadesScreen() {
       )}
 
       <FlatList
+        key={colunas}
         data={filtradas}
+        numColumns={colunas}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
-          <AtividadeCard
-            atividade={item}
-            onPress={() =>
-              router.push({ pathname: '/atividade/[id]', params: { id: item.id } })
-            }
-            onToggle={() => alternarConclusao(item)}
-          />
+          <GridItem colunas={colunas}>
+            <AtividadeCard
+              atividade={item}
+              onPress={() =>
+                router.push({ pathname: '/atividade/[id]', params: { id: item.id } })
+              }
+              onToggle={() => alternarConclusao(item)}
+            />
+          </GridItem>
         )}
         keyboardShouldPersistTaps="handled"
-        contentContainerStyle={[styles.lista, filtradas.length === 0 && styles.listaVazia]}
+        contentContainerStyle={[
+          styles.lista,
+          colunas > 1 && styles.listaColunas,
+          filtradas.length === 0 && styles.listaVazia,
+        ]}
         refreshing={refreshing}
         onRefresh={recarregar}
         ListEmptyComponent={
@@ -141,6 +152,9 @@ const styles = StyleSheet.create({
     padding: spacing.lg,
     paddingTop: 0,
     paddingBottom: 100,
+  },
+  listaColunas: {
+    paddingHorizontal: spacing.lg - spacing.sm,
   },
   listaVazia: {
     flexGrow: 1,

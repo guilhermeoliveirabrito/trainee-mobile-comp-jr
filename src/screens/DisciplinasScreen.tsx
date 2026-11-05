@@ -5,12 +5,15 @@ import { DisciplinaCard } from '../components/DisciplinaCard';
 import { EmptyState } from '../components/EmptyState';
 import { FeedbackMessage } from '../components/FeedbackMessage';
 import { FloatingButton } from '../components/FloatingButton';
+import { GridItem } from '../components/GridItem';
 import { LoadingState } from '../components/LoadingState';
 import { useDisciplinas } from '../hooks/useDisciplinas';
+import { useLayoutResponsivo } from '../hooks/useLayoutResponsivo';
 import { colors, spacing } from '../styles/theme';
 
 export function DisciplinasScreen() {
   const { disciplinas, loading, refreshing, erro, recarregar } = useDisciplinas();
+  const { colunas } = useLayoutResponsivo();
 
   function abrirCadastro() {
     router.push('/disciplina/nova');
@@ -30,18 +33,23 @@ export function DisciplinasScreen() {
       )}
 
       <FlatList
+        key={colunas}
         data={disciplinas}
+        numColumns={colunas}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
-          <DisciplinaCard
-            disciplina={item}
-            onPress={() =>
-              router.push({ pathname: '/disciplina/[id]', params: { id: item.id } })
-            }
-          />
+          <GridItem colunas={colunas}>
+            <DisciplinaCard
+              disciplina={item}
+              onPress={() =>
+                router.push({ pathname: '/disciplina/[id]', params: { id: item.id } })
+              }
+            />
+          </GridItem>
         )}
         contentContainerStyle={[
           styles.lista,
+          colunas > 1 && styles.listaColunas,
           disciplinas.length === 0 && styles.listaVazia,
         ]}
         refreshing={refreshing}
@@ -75,6 +83,9 @@ const styles = StyleSheet.create({
   lista: {
     padding: spacing.lg,
     paddingBottom: 100,
+  },
+  listaColunas: {
+    paddingHorizontal: spacing.lg - spacing.sm,
   },
   listaVazia: {
     flexGrow: 1,
