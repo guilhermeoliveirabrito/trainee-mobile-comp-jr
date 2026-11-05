@@ -1,14 +1,14 @@
 import { ReactNode } from 'react';
 import {
-    KeyboardAvoidingView,
-    Platform,
-    ScrollView,
-    StyleSheet,
-    Text,
-    useWindowDimensions,
-    View,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useLayoutResponsivo } from '../hooks/useLayoutResponsivo';
 import { colors, fontSize, radius, spacing } from '../styles/theme';
 
 type Props = {
@@ -17,11 +17,8 @@ type Props = {
   children: ReactNode;
 };
 
-const LARGURA_TABLET = 768;
-
 export function AuthLayout({ title, subtitle, children }: Props) {
-  const { width } = useWindowDimensions();
-  const isTablet = width >= LARGURA_TABLET;
+  const { isTablet } = useLayoutResponsivo();
 
   return (
     <View style={[styles.root, isTablet && styles.rootTablet]}>
