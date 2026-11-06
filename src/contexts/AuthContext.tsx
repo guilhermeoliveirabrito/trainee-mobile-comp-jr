@@ -29,6 +29,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
   const [sessaoExpirada, setSessaoExpirada] = useState(false);
+  // Separa o logout pelo botão de uma sessão que caiu sozinha
   const saidaManual = useRef(false);
 
   useEffect(() => {
@@ -41,6 +42,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const { data } = supabase.auth.onAuthStateChange((evento, novaSessao) => {
       setSession(novaSessao);
 
+      // Se não foi o botão Sair, a sessão expirou
       if (evento === 'SIGNED_OUT') {
         setSessaoExpirada(!saidaManual.current);
       }
@@ -67,6 +69,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const { error } = await supabase.auth.signUp({
         email,
         password,
+        // O gatilho do banco lê o nome daqui pra criar o perfil
         options: { data: { nome } },
       });
       return { error: error ? getErrorMessage(error) : null };
@@ -80,6 +83,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       await supabase.auth.signOut();
     } finally {
+      // Desmarca mesmo se o signOut falhar
       saidaManual.current = false;
     }
   }
