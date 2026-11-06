@@ -17,7 +17,9 @@ export function formatarDuracao(totalMinutos: number): string {
 
 export function inicioDaSemanaIso(): string {
   const hoje = new Date();
+  // Semana começa na segunda, o getDay devolve 0 pro domingo
   const diasDesdeSegunda = (hoje.getDay() + 6) % 7;
+  // Se o dia ficar negativo o próprio Date volta pro mês anterior
   const segunda = new Date(
     hoje.getFullYear(),
     hoje.getMonth(),
