@@ -1,5 +1,5 @@
-import { ScreenPlaceholder } from '../../components/ScreenPlaceholder';
+import { FocoScreen } from '../../screens/FocoScreen';
 
 export default function FocoRoute() {
-  return <ScreenPlaceholder title="Foco" />;
+  return <FocoScreen />;
 }
