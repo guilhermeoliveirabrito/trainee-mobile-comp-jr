@@ -13,6 +13,7 @@ type Props<T extends string> = {
   value: T | null;
   onChange: (value: T) => void;
   error?: string;
+  disabled?: boolean;
 };
 
 export function OptionSelector<T extends string>({
@@ -21,9 +22,10 @@ export function OptionSelector<T extends string>({
   value,
   onChange,
   error,
+  disabled,
 }: Props<T>) {
   return (
-    <View style={styles.wrapper}>
+    <View style={[styles.wrapper, disabled && styles.desabilitado]}>
       {!!label && <Text style={styles.label}>{label}</Text>}
       <View style={styles.opcoes}>
         {options.map((opcao) => {
@@ -31,6 +33,7 @@ export function OptionSelector<T extends string>({
           return (
             <Pressable
               key={opcao.value}
+              disabled={disabled}
               onPress={() => onChange(opcao.value)}
               style={[styles.chip, selecionada && styles.chipSelecionado]}
             >
@@ -52,6 +55,9 @@ export function OptionSelector<T extends string>({
 const styles = StyleSheet.create({
   wrapper: {
     marginBottom: spacing.md,
+  },
+  desabilitado: {
+    opacity: 0.5,
   },
   label: {
     marginBottom: spacing.sm,
