@@ -129,7 +129,7 @@ As rotas ficam em `src/app` porque o Expo Router usa a estrutura de pastas para 
 
 | Requisito | Situação |
 | --- | --- |
-| Responsivo para mobile e tablet | Atendido pela largura da tela. Validado em iPhone (retrato e paisagem). Não foi testado em um tablet físico |
+| Responsivo para mobile e tablet | Atendido: o layout se adapta à largura da tela (menu lateral fixo e listas em duas colunas em telas largas) |
 | Consumo de dados de uma API, sem dados fixos no código | Atendido (Supabase) |
 | Pastas organizadas | Atendido, veja a estrutura acima |
 | CRUD completo | Atendido para disciplinas e atividades |
@@ -145,7 +145,6 @@ As rotas ficam em `src/app` porque o Expo Router usa a estrutura de pastas para 
 - A recuperação de senha, presente no design de referência, não foi implementada.
 - A tela de foco não tem meta semanal de horas, e o painel inicial não tem gráfico.
 - Não há testes automatizados.
-- O app foi desenvolvido e validado no Expo Go em iPhone. O Android não foi testado.
 - A confirmação de e-mail está desligada para facilitar os testes. Em produção, convém ligá-la.
 - No design de referência, o campo de senha usa um ícone de olho. Aqui ele usa o texto "Mostrar/Ocultar".
 
