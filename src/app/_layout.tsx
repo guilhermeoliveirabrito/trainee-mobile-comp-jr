@@ -5,6 +5,7 @@ import { LoadingState } from '../components/LoadingState';
 import { AuthProvider, useAuth } from '../contexts/AuthContext';
 import { colors } from '../styles/theme';
 
+// Cabeçalho das telas que abrem por cima do menu
 const cabecalho = {
   headerShown: true,
   headerBackTitle: 'Voltar',
@@ -12,6 +13,7 @@ const cabecalho = {
   headerTintColor: colors.surface,
 };
 
+// O Expo Router usa essa função como tela de erro de qualquer rota
 export function ErrorBoundary({ error, retry }: ErrorBoundaryProps) {
   return <ErroFallback error={error} onRetry={retry} />;
 }
@@ -19,10 +21,12 @@ export function ErrorBoundary({ error, retry }: ErrorBoundaryProps) {
 function RootNavigator() {
   const { session, loading } = useAuth();
 
+  // Espera ler a sessão salva, senão o login pisca antes de entrar no app
   if (loading) {
     return <LoadingState message="Carregando sessão..." />;
   }
 
+  // Com sessão só o app aparece, sem sessão só o login (e cai no /login)
   return (
     <Stack screenOptions={{ headerShown: false }}>
       <Stack.Protected guard={!!session} redirectTo="/login">
