@@ -1,13 +1,13 @@
 import { DadosDisciplina, Disciplina } from '../types/disciplina';
 import {
-    garantirLista,
-    garantirObjeto,
-    garantirRegistro,
-    lancarErro,
+  garantirLista,
+  garantirObjeto,
+  garantirRegistro,
+  lancarErro,
 } from './erros';
 import { supabase } from './supabase';
 
-const COLUNAS = 'id, nome, professor, semestre, cor, criado_em';
+const COLUNAS = 'id, nome, professor, semestre, cor, foto_path, criado_em';
 
 export async function listarDisciplinas(): Promise<Disciplina[]> {
   const { data, error, status } = await supabase

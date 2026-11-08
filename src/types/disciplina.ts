@@ -4,6 +4,7 @@ export type Disciplina = {
   professor: string | null;
   semestre: string | null;
   cor: string;
+  foto_path: string | null;
   criado_em: string;
 };
 
@@ -12,4 +13,5 @@ export type DadosDisciplina = {
   professor: string | null;
   semestre: string | null;
   cor: string;
+  foto_path: string | null;
 };
