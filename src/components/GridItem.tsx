@@ -8,10 +8,12 @@ type Props = {
 };
 
 export function GridItem({ colunas, children }: Props) {
+  // Com uma coluna só não precisa de caixa em volta
   if (colunas <= 1) {
     return <>{children}</>;
   }
 
+  // Cada item ocupa uma fatia da linha e o padding vira o espaço entre colunas
   const largura = `${100 / colunas}%` as `${number}%`;
 
   return <View style={[styles.item, { width: largura }]}>{children}</View>;
