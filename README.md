@@ -8,7 +8,8 @@ O Mentor reúne em um só lugar as disciplinas do semestre, as atividades com da
 
 - Cadastro, login com e-mail e senha, sessão mantida entre aberturas do app e logout.
 - Todas as telas do app ficam atrás do login. Quem não está autenticado só vê as telas de login e cadastro.
-- CRUD completo de disciplinas: nome, professor, semestre e cor.
+- CRUD completo de disciplinas: nome, professor, semestre, cor e foto de capa opcional.
+- Foto de capa escolhida na galeria do celular, com corte em 16:9. A foto é trocada ou apagada junto com a disciplina.
 - CRUD completo de atividades: título, descrição, tipo, prioridade, status, data de entrega e disciplina.
 - Busca por título e filtro por status na lista de atividades.
 - Marcar uma atividade como concluída (ou reabri-la) direto pela lista.
@@ -24,9 +25,10 @@ O Mentor reúne em um só lugar as disciplinas do semestre, as atividades com da
 | React Native 0.88 e Expo SDK 58 | Base do aplicativo |
 | TypeScript | Tipagem do código |
 | Expo Router | Rotas baseadas em arquivos, menu lateral (`Drawer`) e rotas protegidas (`Stack.Protected`) |
-| Supabase (Auth, PostgreSQL e RLS) | Login, banco de dados e API |
+| Supabase (Auth, PostgreSQL, Storage e RLS) | Login, banco de dados, fotos e API |
 | `@supabase/supabase-js` | Cliente do Supabase |
 | `@react-native-async-storage/async-storage` | Guarda a sessão do usuário no aparelho |
+| `expo-image-picker` | Escolha da foto de capa na galeria |
 | `@expo/ui` | Seletor de data (calendário) |
 | React Native Gesture Handler e Reanimated | Animações e gestos do menu lateral |
 
@@ -35,8 +37,9 @@ O Mentor reúne em um só lugar as disciplinas do semestre, as atividades com da
 - **Expo com React Native.** É a combinação recomendada pelo documento do desafio. O Expo Go permite testar no celular sem instalar emuladores.
 - **Expo Router.** As rotas seguem a estrutura de pastas, e as telas protegidas por login são declaradas com `Stack.Protected` no layout raiz. Ele é construído sobre o React Navigation.
 - **Supabase no lugar das opções de back-end sugeridas.** O documento permite outro back-end à escolha, e o uso do Supabase foi confirmado por mensagem com a organização da trilha. Ele cobre os requisitos de autenticação (e-mail e senha, sessão e logout) e de CRUD sem exigir um servidor próprio. A segurança por linha (RLS) garante que cada usuário acesse só os próprios dados, e o esquema do banco fica versionado em `supabase/schema.sql`. Também diferencia este projeto do da trilha de front-end, que usa a opção recomendada.
+- **Fotos no Storage do Supabase.** As capas ficam no bucket público `capas`, e no banco fica só o caminho do arquivo. As regras do Storage deixam cada usuário enviar e apagar arquivos apenas na própria pasta (o nome da pasta é o id do usuário). A URL pública é montada no app. Ao trocar a foto, removê-la ou excluir a disciplina, o arquivo antigo é apagado. O bucket aceita JPEG, PNG e WebP de até 5 MB, e o seletor já reduz a qualidade da foto antes do envio.
 - **Context API e hooks.** A sessão do usuário fica em um contexto (`AuthContext`), e o carregamento de cada lista fica em hooks (`useDisciplinas`, `useAtividades`, `useSessoes`). Todos os componentes são de função.
-- **Camadas separadas.** As telas não conhecem o Supabase: elas usam hooks, e os hooks usam os serviços da pasta `services`. Os componentes visuais são reaproveitados entre as telas (botão, campo de texto, cartões, seletor de opções, estados vazio e de carregamento).
+- **Camadas separadas.** As telas leem os dados pelos hooks e gravam (criar, editar, excluir) chamando os serviços da pasta `services`, que são os únicos que conhecem o Supabase. Os componentes visuais são reaproveitados entre as telas (botão, campo de texto, cartões, seletor de opções, estados vazio e de carregamento).
 - **Tratamento de erros centralizado.** `utils/errorMessages.ts` traduz os erros da API em mensagens claras: falha de conexão, servidor indisponível, dados inválidos, falha de autenticação, sessão expirada, falta de permissão e resposta inesperada. Os serviços validam o formato das respostas antes de entregá-las às telas, e uma tela de erro própria cobre falhas inesperadas.
 - **Responsividade por largura de tela.** O hook `useLayoutResponsivo` decide o layout pela largura da janela, então vale para celular em pé, em paisagem e para tablets.
 - **`.npmrc` com `legacy-peer-deps`.** Durante a atualização para o SDK 58, o npm acusou um conflito entre dependências opcionais do Expo Router. O arquivo faz o `npm install` funcionar do mesmo jeito em qualquer máquina.
@@ -85,7 +88,7 @@ Para ver as telas com dados, cadastre primeiro uma disciplina (menu **Disciplina
 ### Usando o seu próprio projeto Supabase (opcional)
 
 1. Crie uma conta e um projeto em [supabase.com](https://supabase.com).
-2. No **SQL Editor**, cole o conteúdo de `supabase/schema.sql` e execute. Isso cria as tabelas, as regras de segurança e o gatilho que cria o perfil no cadastro.
+2. No **SQL Editor**, execute o conteúdo de `supabase/schema.sql` e, depois, o de `supabase/fotos.sql`. O primeiro cria as tabelas, as regras de segurança e o gatilho que cria o perfil no cadastro. O segundo adiciona a coluna da foto e o bucket `capas`, com as regras do Storage.
 3. Em **Authentication**, **Sign In / Providers**, **Email**, desligue a opção **Confirm email** e salve.
 4. Em **Project Settings**, **API Keys**, copie a chave publishable (`sb_publishable_...`). A URL do projeto aparece na página **Home**.
 5. Coloque os dois valores no `.env`:
@@ -114,12 +117,13 @@ src/
   contexts/         Contexto de autenticação
   hooks/            Carregamento de dados, cronômetro e layout responsivo
   screens/          Conteúdo de cada tela
-  services/         Acesso ao Supabase e tratamento das respostas
+  services/         Acesso ao Supabase (banco e Storage) e tratamento das respostas
   styles/           Cores, espaçamentos e tamanhos
   types/            Tipos do TypeScript
-  utils/            Datas, tempo e mensagens de erro
+  utils/            Datas, tempo, imagem e mensagens de erro
 supabase/
   schema.sql        Esquema do banco, regras de segurança e gatilho
+  fotos.sql         Coluna da foto, bucket de capas e regras do Storage
 assets/             Ícones e imagens do aplicativo
 ```
 
@@ -144,6 +148,7 @@ As rotas ficam em `src/app` porque o Expo Router usa a estrutura de pastas para 
 
 - A recuperação de senha, presente no design de referência, não foi implementada.
 - A tela de foco não tem meta semanal de horas, e o painel inicial não tem gráfico.
+- As fotos são só da disciplina. Anexar imagens às atividades seria uma extensão natural.
 - Não há testes automatizados.
 - A confirmação de e-mail está desligada para facilitar os testes. Em produção, convém ligá-la.
 - No design de referência, o campo de senha usa um ícone de olho. Aqui ele usa o texto "Mostrar/Ocultar".
