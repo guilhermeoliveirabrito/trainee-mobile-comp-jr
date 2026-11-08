@@ -146,7 +146,6 @@ As rotas ficam em `src/app` porque o Expo Router usa a estrutura de pastas para 
 
 ## Limitações conhecidas e melhorias futuras
 
-- A recuperação de senha, presente no design de referência, não foi implementada.
 - A tela de foco não tem meta semanal de horas, e o painel inicial não tem gráfico.
 - As fotos são só da disciplina. Anexar imagens às atividades seria uma extensão natural.
 - Não há testes automatizados.
