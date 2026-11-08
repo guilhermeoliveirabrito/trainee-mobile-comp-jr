@@ -9,6 +9,7 @@ import { GridItem } from '../components/GridItem';
 import { LoadingState } from '../components/LoadingState';
 import { useDisciplinas } from '../hooks/useDisciplinas';
 import { useLayoutResponsivo } from '../hooks/useLayoutResponsivo';
+import { urlDaFoto } from '../services/fotos';
 import { colors, spacing } from '../styles/theme';
 
 export function DisciplinasScreen() {
@@ -32,6 +33,7 @@ export function DisciplinasScreen() {
         </View>
       )}
 
+      {/* O key força o FlatList a recriar quando muda o número de colunas */}
       <FlatList
         key={colunas}
         data={disciplinas}
@@ -41,6 +43,7 @@ export function DisciplinasScreen() {
           <GridItem colunas={colunas}>
             <DisciplinaCard
               disciplina={item}
+              fotoUrl={urlDaFoto(item.foto_path)}
               onPress={() =>
                 router.push({ pathname: '/disciplina/[id]', params: { id: item.id } })
               }
@@ -84,6 +87,7 @@ const styles = StyleSheet.create({
     padding: spacing.lg,
     paddingBottom: 100,
   },
+  // Tira o espaço que o GridItem já coloca dos lados
   listaColunas: {
     paddingHorizontal: spacing.lg - spacing.sm,
   },
