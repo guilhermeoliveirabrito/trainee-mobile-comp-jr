@@ -1,13 +1,14 @@
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
 import { colors, fontSize, radius, spacing } from '../styles/theme';
 import { Disciplina } from '../types/disciplina';
 
 type Props = {
   disciplina: Disciplina;
+  fotoUrl?: string | null;
   onPress?: () => void;
 };
 
-export function DisciplinaCard({ disciplina, onPress }: Props) {
+export function DisciplinaCard({ disciplina, fotoUrl, onPress }: Props) {
   const detalhes = [disciplina.professor, disciplina.semestre]
     .filter(Boolean)
     .join(' • ');
@@ -17,10 +18,14 @@ export function DisciplinaCard({ disciplina, onPress }: Props) {
       onPress={onPress}
       style={({ pressed }) => [styles.card, pressed && styles.pressionado]}
     >
-      <View style={[styles.marca, { backgroundColor: disciplina.cor }]} />
-      <View style={styles.texto}>
-        <Text style={styles.nome}>{disciplina.nome}</Text>
-        {!!detalhes && <Text style={styles.detalhes}>{detalhes}</Text>}
+      {!!fotoUrl && <Image source={{ uri: fotoUrl }} style={styles.foto} />}
+
+      <View style={styles.linha}>
+        <View style={[styles.marca, { backgroundColor: disciplina.cor }]} />
+        <View style={styles.texto}>
+          <Text style={styles.nome}>{disciplina.nome}</Text>
+          {!!detalhes && <Text style={styles.detalhes}>{detalhes}</Text>}
+        </View>
       </View>
     </Pressable>
   );
@@ -28,7 +33,6 @@ export function DisciplinaCard({ disciplina, onPress }: Props) {
 
 const styles = StyleSheet.create({
   card: {
-    flexDirection: 'row',
     marginBottom: spacing.md,
     borderRadius: radius.md,
     backgroundColor: colors.surface,
@@ -36,6 +40,15 @@ const styles = StyleSheet.create({
   },
   pressionado: {
     opacity: 0.7,
+  },
+  // Mesma proporção do corte que o seletor faz
+  foto: {
+    width: '100%',
+    aspectRatio: 16 / 9,
+    backgroundColor: colors.border,
+  },
+  linha: {
+    flexDirection: 'row',
   },
   marca: {
     width: 8,
