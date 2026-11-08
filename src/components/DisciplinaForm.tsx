@@ -1,27 +1,37 @@
+import * as ImagePicker from 'expo-image-picker';
 import { useState } from 'react';
 import {
-    KeyboardAvoidingView,
-    Platform,
-    Pressable,
-    ScrollView,
-    StyleSheet,
-    Text,
-    View,
+  Image,
+  KeyboardAvoidingView,
+  Platform,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
 } from 'react-native';
-import { colors, fontSize, spacing } from '../styles/theme';
+import { colors, fontSize, radius, spacing } from '../styles/theme';
 import { Button } from './Button';
 import { FeedbackMessage } from './FeedbackMessage';
 import { Input } from './Input';
+
+// O que fazer com a foto quando salvar
+export type AlteracaoFoto =
+  | { acao: 'manter' }
+  | { acao: 'remover' }
+  | { acao: 'nova'; base64: string; uri: string };
 
 export type ValoresDisciplina = {
   nome: string;
   professor: string;
   semestre: string;
   cor: string;
+  foto: AlteracaoFoto;
 };
 
 type Props = {
-  initial?: Partial<ValoresDisciplina>;
+  initial?: Partial<Omit<ValoresDisciplina, 'foto'>>;
+  fotoAtualUrl?: string | null;
   submitLabel: string;
   onSubmit: (valores: ValoresDisciplina) => Promise<string | null>;
 };
@@ -37,14 +47,51 @@ const CORES = [
   '#7A8699',
 ];
 
-export function DisciplinaForm({ initial, submitLabel, onSubmit }: Props) {
+export function DisciplinaForm({ initial, fotoAtualUrl, submitLabel, onSubmit }: Props) {
   const [nome, setNome] = useState(initial?.nome ?? '');
   const [professor, setProfessor] = useState(initial?.professor ?? '');
   const [semestre, setSemestre] = useState(initial?.semestre ?? '');
   const [cor, setCor] = useState(initial?.cor ?? CORES[0]);
+  const [foto, setFoto] = useState<AlteracaoFoto>({ acao: 'manter' });
   const [erroNome, setErroNome] = useState('');
   const [erroGeral, setErroGeral] = useState('');
   const [enviando, setEnviando] = useState(false);
+
+  // Mostra a foto nova se tiver, senão a que já estava salva
+  const previa =
+    foto.acao === 'nova' ? foto.uri : foto.acao === 'manter' ? fotoAtualUrl ?? null : null;
+
+  async function escolherFoto() {
+    setErroGeral('');
+
+    try {
+      const resultado = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ['images'],
+        allowsEditing: true,
+        aspect: [16, 9],
+        // Com qualidade menor a foto sai em JPEG e o envio fica mais leve
+        quality: 0.7,
+        base64: true,
+      });
+
+      if (resultado.canceled) return;
+
+      const asset = resultado.assets[0];
+      if (!asset.base64) {
+        setErroGeral('Não foi possível ler essa foto. Tente outra.');
+        return;
+      }
+
+      setFoto({ acao: 'nova', base64: asset.base64, uri: asset.uri });
+    } catch {
+      setErroGeral('Não foi possível abrir a galeria.');
+    }
+  }
+
+  function removerFoto() {
+    // Só precisa apagar no servidor se já existia uma foto salva
+    setFoto(fotoAtualUrl ? { acao: 'remover' } : { acao: 'manter' });
+  }
 
   async function handleSubmit() {
     if (nome.trim().length < 1) {
@@ -55,7 +102,7 @@ export function DisciplinaForm({ initial, submitLabel, onSubmit }: Props) {
     setErroNome('');
     setErroGeral('');
     setEnviando(true);
-    const erro = await onSubmit({ nome, professor, semestre, cor });
+    const erro = await onSubmit({ nome, professor, semestre, cor, foto });
     setEnviando(false);
 
     if (erro) setErroGeral(erro);
@@ -73,6 +120,33 @@ export function DisciplinaForm({ initial, submitLabel, onSubmit }: Props) {
       >
         <View style={styles.form}>
           {!!erroGeral && <FeedbackMessage type="error" text={erroGeral} />}
+
+          <Text style={styles.label}>Foto de capa (opcional)</Text>
+          {previa ? (
+            <Image source={{ uri: previa }} style={styles.previa} />
+          ) : (
+            <View style={[styles.previa, styles.semFoto]}>
+              <Text style={styles.semFotoTexto}>Sem foto</Text>
+            </View>
+          )}
+          <View style={styles.acoesFoto}>
+            <Button
+              title={previa ? 'Trocar foto' : 'Escolher foto'}
+              variant="outline"
+              onPress={escolherFoto}
+              disabled={enviando}
+            />
+            {!!previa && (
+              <View style={styles.espaco}>
+                <Button
+                  title="Remover foto"
+                  variant="outline"
+                  onPress={removerFoto}
+                  disabled={enviando}
+                />
+              </View>
+            )}
+          </View>
 
           <Input
             label="Nome"
@@ -140,6 +214,27 @@ const styles = StyleSheet.create({
     fontSize: fontSize.sm,
     fontWeight: '600',
     color: colors.text,
+  },
+  previa: {
+    width: '100%',
+    aspectRatio: 16 / 9,
+    borderRadius: radius.md,
+    backgroundColor: colors.border,
+  },
+  semFoto: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  semFotoTexto: {
+    fontSize: fontSize.sm,
+    color: colors.textMuted,
+  },
+  acoesFoto: {
+    marginTop: spacing.sm,
+    marginBottom: spacing.lg,
+  },
+  espaco: {
+    marginTop: spacing.sm,
   },
   cores: {
     flexDirection: 'row',
